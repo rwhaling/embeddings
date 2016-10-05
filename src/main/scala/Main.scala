@@ -8,6 +8,11 @@ import org.apache.spark.ml.feature.Word2VecModel
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.functions._
 
+import akka.actor.ActorSystem
+import akka.http.scaladsl.Http
+import akka.http.scaladsl.server.Directives._
+import akka.stream.ActorMaterializer
+
 object SparkApp {
 
   def main(args: Array[String]) {
@@ -54,10 +59,12 @@ object SparkApp {
      * For a given dimension, sort the (word,vector) rows in the model by the value of that dimension
      * Effectively, this produces the most-highly-ranked words for a given dimension
      */
-    def sortVectorsByDimension(model:Word2VecModel, dimension:Integer, count:Integer):Array[(String,Double)] = model.getVectors
+    def sortVectorsByDimension(vectors:Array[Row], dimension:Integer, count:Integer):Array[(String,Double)] = vectors
       .map { case Row(word:String,vector:org.apache.spark.ml.linalg.Vector) => (word,vector(dimension)) }
-      .sort(desc("_2"))
+      .sortBy(_._2)
       .take(count)
+
+      // .sort(desc("_2"))
 
     /*
      * For a single word's vector representation, re-sort the dimensions by magnitude,
@@ -67,12 +74,36 @@ object SparkApp {
     def rankDimensions(vector:org.apache.spark.ml.linalg.Vector):Array[(Double,Int)] = 
       vector.toArray.zipWithIndex.sortBy(_._1)
 
+    val mod = spark.sparkContext.broadcast(model)
+    val vectors = model.getVectors.collect()
 
-    for (d <- 0 to model.getVectorSize - 1) {
+    val topWords = (0 to model.getVectorSize - 1).map { d =>
+      (d,sortVectorsByDimension(vectors,d,50))
+    }
+
+    for ((d,t) <- topWords) {
       println(d)
-      sortVectorsByDimension(model,d,20).foreach { println }
+      for ((w,t) <- t) {
+        println(w + ":" + t.toString)
+      }
       println()
     }
 
+    println("model built, initializing web server")
+
+    implicit val system = ActorSystem("sangria-server")
+    implicit val materializer = ActorMaterializer()
+    implicit val executionContext = system.dispatcher
+
+    import akka.http.scaladsl.server.Route._
+
+    val route = 
+      path("hello") {
+        get {
+          complete("Say hello to akka-http")
+        }
+      }
+
+    Http().bindAndHandle(route, "0.0.0.0", 8080)
   }
 }
