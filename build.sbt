@@ -10,6 +10,9 @@ libraryDependencies ++=
   Seq("org.apache.spark" %% "spark-core" % "2.0.0",   
       "org.apache.spark" %% "spark-sql"  % "2.0.0",
       "org.apache.spark" %% "spark-mllib"   % "2.0.0",
+	  "org.sangria-graphql" %% "sangria" % "0.7.0",
+	  "org.sangria-graphql" %% "sangria-spray-json" % "0.3.1",
+	  "com.typesafe.akka" %% "akka-http-spray-json-experimental" % "2.4.11",
       "com.typesafe.akka" %% "akka-http-experimental" % "2.4.11")
 resolvers ++= Seq( 
  "scala-tools" at "https://oss.sonatype.org/content/groups/scala-tools",
@@ -19,10 +22,10 @@ resolvers ++= Seq(
  Resolver.sonatypeRepo("releases"),
  "Akka Repository" at "http://repo.akka.io/releases/")
 
- mergeStrategy in assembly <<= (mergeStrategy in assembly) { (old) =>
-   {
+mergeStrategy in assembly <<= (mergeStrategy in assembly) { (old) =>
+  {
     case PathList("META-INF", xs @ _*) => MergeStrategy.discard
     case n if n.startsWith("reference.conf") => MergeStrategy.concat
     case x => MergeStrategy.first
-   }
+  }
 }
