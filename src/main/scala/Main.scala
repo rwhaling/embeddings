@@ -18,17 +18,9 @@ object Main {
       .appName("WordEmbeddings")
       .getOrCreate
 
-    val model = SparkJob(spark,"/Users/rwhaling/Downloads/brown/c*")
+    val model = SparkJob(spark,args(0))
 
     val modelRepo = SparkJob.makeModelRepo(model,spark)
-
-    for ((d,t) <- modelRepo.dimensions) {
-      println(d)
-      for ((w,t) <- t.take(5)) {
-        println(w + ":" + t.toString)
-      }
-      println()
-    }
 
     println("model built, initializing web server")
 

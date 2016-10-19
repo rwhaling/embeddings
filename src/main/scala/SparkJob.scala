@@ -101,9 +101,9 @@ object SparkJob {
       .appName("WordEmbeddings")
       .getOrCreate
     println("fitting model")
-    val model = SparkJob(spark,"/Users/rwhaling/Downloads/brown/c*")
+    val model = SparkJob(spark,args(0))
     println("saving model")
-    model.write.overwrite().save("model.json")
+    model.write.overwrite().save(args(1))
     println ("done")
 
   }
