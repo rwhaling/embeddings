@@ -9,7 +9,7 @@ This is a simple example project for what we've dubbed the GRASS stack:
 
 It uses Spark's Implementation of Word2Vec to build a model of text from an input corpus,
 then exposes a GraphQL interface with a React frontend.
-You can read more about it in [this blog post](http://staging.spantree.net/blog/2016/10/18/spark-akka-sangria.html)
+You can read more about it in [this blog post](http://www.spantree.net/blog/2016/10/18/spark-akka-sangria.html)
 
 Getting Data
 ------------
