@@ -1,4 +1,5 @@
 model.json/*
 .idea/*
-project/*
+/project/project/*
+/project/target/*
 target/*
